@@ -13,7 +13,7 @@
  * See the GNU General Public License for more details.
  *
  *
- * Copyright 2006 - 2014 Pentaho Corporation.  All rights reserved.
+ * Copyright 2006 - 2017 Pentaho Corporation.  All rights reserved.
  */
 package org.pentaho.platform.engine.services.connection.datasource.dbcp;
 
@@ -42,14 +42,10 @@ public class DynamicallyPooledDatasourceSystemListener extends PooledDatasourceS
     DataSource ds = null;
     try {
       ds = getDatasourceService().getDataSource( connection.getName() );
-    } catch ( RuntimeException e ) {
-      if ( RuntimeException.class != e.getClass() ) {
-        throw e;
-      }
-      Logger.info( this, e.getMessage(), e );
-    } catch ( DBDatasourceServiceException e ) {
-      Logger.error( this, Messages.getInstance()
-          .getErrorString( "DatasourceSystemListener.ERROR_0003_UNABLE_TO_POOL_DATASOURCE", connection.getName(), e.getMessage() ) ); //$NON-NLS-1$
+    } catch ( DBDatasourceServiceException | DriverNotInitializedException e ) {
+      Logger.error( this, Messages.getInstance().getErrorString(
+          "DatasourceSystemListener.ERROR_0003_UNABLE_TO_POOL_DATASOURCE", connection.getName(), //$NON-NLS-1$
+          e.getMessage() ) );
     }
     return ds;
   }

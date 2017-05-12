@@ -67,15 +67,14 @@ public class PooledDatasourceHelper {
     try {
       if ( databaseConnection.getAccessType().equals( DatabaseAccessType.JNDI ) ) {
         throw new DBDatasourceServiceException( Messages.getInstance().getErrorString(
-            "PooledDatasourceHelper.ERROR_0008_UNABLE_TO_POOL_DATASOURCE_IT_IS_JNDI",
-            databaseConnection.getName() ) );
+            "PooledDatasourceHelper.ERROR_0008_UNABLE_TO_POOL_DATASOURCE_IT_IS_JNDI", databaseConnection.getName() ) );
       }
       ICacheManager cacheManager = PentahoSystem.getCacheManager( null );
       IDatabaseDialectService databaseDialectService = PentahoSystem.get( IDatabaseDialectService.class );
       if ( databaseDialectService == null ) {
         throw new DBDatasourceServiceException( Messages.getInstance().getErrorString(
-            "PooledDatasourceHelper.ERROR_0005_UNABLE_TO_POOL_DATASOURCE_NO_DIALECT_SERVICE",
-            databaseConnection.getName() ) );
+            "PooledDatasourceHelper.ERROR_0005_UNABLE_TO_POOL_DATASOURCE_NO_DIALECT_SERVICE", databaseConnection
+                .getName() ) );
       }
       IDatabaseDialect dialect = databaseDialectService.getDialect( databaseConnection );
       if ( dialect == null || dialect.getDatabaseType() == null ) {
@@ -86,7 +85,8 @@ public class PooledDatasourceHelper {
         driverClass = databaseConnection.getAttributes().get( GenericDatabaseDialect.ATTRIBUTE_CUSTOM_DRIVER_CLASS );
         if ( StringUtils.isEmpty( driverClass ) ) {
           throw new DBDatasourceServiceException( Messages.getInstance().getErrorString(
-              "PooledDatasourceHelper.ERROR_0006_UNABLE_TO_POOL_DATASOURCE_NO_CLASSNAME", databaseConnection.getName() ) );
+              "PooledDatasourceHelper.ERROR_0006_UNABLE_TO_POOL_DATASOURCE_NO_CLASSNAME", databaseConnection
+                  .getName() ) );
         }
 
       } else {
@@ -131,20 +131,20 @@ public class PooledDatasourceHelper {
       // setting properties according to user specifications
       Map<String, String> attributes = databaseConnection.getConnectionPoolingProperties();
 
-      if ( attributes.containsKey( IDBDatasourceService.MAX_ACTIVE_KEY )
-          && NumberUtils.isNumber( attributes.get( IDBDatasourceService.MAX_ACTIVE_KEY ) ) ) {
+      if ( attributes.containsKey( IDBDatasourceService.MAX_ACTIVE_KEY ) && NumberUtils.isNumber( attributes.get(
+          IDBDatasourceService.MAX_ACTIVE_KEY ) ) ) {
         maxActiveConnection = Integer.parseInt( attributes.get( IDBDatasourceService.MAX_ACTIVE_KEY ) );
       }
-      if ( attributes.containsKey( IDBDatasourceService.MAX_WAIT_KEY )
-          && NumberUtils.isNumber( attributes.get( IDBDatasourceService.MAX_WAIT_KEY ) ) ) {
+      if ( attributes.containsKey( IDBDatasourceService.MAX_WAIT_KEY ) && NumberUtils.isNumber( attributes.get(
+          IDBDatasourceService.MAX_WAIT_KEY ) ) ) {
         waitTime = Integer.parseInt( attributes.get( IDBDatasourceService.MAX_WAIT_KEY ) );
       }
-      if ( attributes.containsKey( IDBDatasourceService.MIN_IDLE_KEY )
-          && NumberUtils.isNumber( attributes.get( IDBDatasourceService.MIN_IDLE_KEY ) ) ) {
+      if ( attributes.containsKey( IDBDatasourceService.MIN_IDLE_KEY ) && NumberUtils.isNumber( attributes.get(
+          IDBDatasourceService.MIN_IDLE_KEY ) ) ) {
         minIdleConnection = Integer.parseInt( attributes.get( IDBDatasourceService.MIN_IDLE_KEY ) );
       }
-      if ( attributes.containsKey( IDBDatasourceService.MAX_IDLE_KEY )
-          && NumberUtils.isNumber( attributes.get( IDBDatasourceService.MAX_IDLE_KEY ) ) ) {
+      if ( attributes.containsKey( IDBDatasourceService.MAX_IDLE_KEY ) && NumberUtils.isNumber( attributes.get(
+          IDBDatasourceService.MAX_IDLE_KEY ) ) ) {
         maxIdleConnection = Integer.parseInt( attributes.get( IDBDatasourceService.MAX_IDLE_KEY ) );
       }
       if ( attributes.containsKey( IDBDatasourceService.QUERY_KEY ) ) {
@@ -163,9 +163,9 @@ public class PooledDatasourceHelper {
       poolingDataSource = new PoolingDataSource();
       if ( dialect instanceof IDriverLocator ) {
         if ( !( (IDriverLocator) dialect ).initialize( driverClass ) ) {
-          throw new RuntimeException( Messages.getInstance()
-            .getErrorString( "PooledDatasourceHelper.ERROR_0009_UNABLE_TO_POOL_DATASOURCE_CANT_INITIALIZE",
-              databaseConnection.getName(), driverClass ) );
+          throw new DriverNotInitializedException( Messages.getInstance().getErrorString(
+              "PooledDatasourceHelper.ERROR_0009_UNABLE_TO_POOL_DATASOURCE_CANT_INITIALIZE", databaseConnection
+                  .getName(), driverClass ) );
         }
       } else {
         Class.forName( driverClass );
@@ -174,8 +174,8 @@ public class PooledDatasourceHelper {
       GenericObjectPool pool = new GenericObjectPool( null );
 
       // if removedAbandoned = true, then an AbandonedObjectPool object will take GenericObjectPool's place
-      if ( attributes.containsKey( IDBDatasourceService.REMOVE_ABANDONED )
-          && true == Boolean.parseBoolean( attributes.get( IDBDatasourceService.REMOVE_ABANDONED ) ) ) {
+      if ( attributes.containsKey( IDBDatasourceService.REMOVE_ABANDONED ) && true == Boolean.parseBoolean( attributes
+          .get( IDBDatasourceService.REMOVE_ABANDONED ) ) ) {
 
         AbandonedConfig config = new AbandonedConfig();
         config.setRemoveAbandoned( Boolean.parseBoolean( attributes.get( IDBDatasourceService.REMOVE_ABANDONED ) ) );
@@ -184,10 +184,10 @@ public class PooledDatasourceHelper {
           config.setLogAbandoned( Boolean.parseBoolean( attributes.get( IDBDatasourceService.LOG_ABANDONED ) ) );
         }
 
-        if ( attributes.containsKey( IDBDatasourceService.REMOVE_ABANDONED_TIMEOUT )
-            && NumberUtils.isNumber( attributes.get( IDBDatasourceService.REMOVE_ABANDONED_TIMEOUT ) ) ) {
-          config.setRemoveAbandonedTimeout( Integer.parseInt( attributes
-              .get( IDBDatasourceService.REMOVE_ABANDONED_TIMEOUT ) ) );
+        if ( attributes.containsKey( IDBDatasourceService.REMOVE_ABANDONED_TIMEOUT ) && NumberUtils.isNumber( attributes
+            .get( IDBDatasourceService.REMOVE_ABANDONED_TIMEOUT ) ) ) {
+          config.setRemoveAbandonedTimeout( Integer.parseInt( attributes.get(
+              IDBDatasourceService.REMOVE_ABANDONED_TIMEOUT ) ) );
         }
 
         pool = new AbandonedObjectPool( null, config );
@@ -205,10 +205,10 @@ public class PooledDatasourceHelper {
       pool.setTestOnBorrow( testOnBorrow );
       pool.setTestWhileIdle( testWhileIdle );
 
-      if ( attributes.containsKey( IDBDatasourceService.TIME_BETWEEN_EVICTION_RUNS_MILLIS )
-          && NumberUtils.isNumber( attributes.get( IDBDatasourceService.TIME_BETWEEN_EVICTION_RUNS_MILLIS ) ) ) {
-        pool.setTimeBetweenEvictionRunsMillis( Long.parseLong( attributes
-            .get( IDBDatasourceService.TIME_BETWEEN_EVICTION_RUNS_MILLIS ) ) );
+      if ( attributes.containsKey( IDBDatasourceService.TIME_BETWEEN_EVICTION_RUNS_MILLIS ) && NumberUtils.isNumber(
+          attributes.get( IDBDatasourceService.TIME_BETWEEN_EVICTION_RUNS_MILLIS ) ) ) {
+        pool.setTimeBetweenEvictionRunsMillis( Long.parseLong( attributes.get(
+            IDBDatasourceService.TIME_BETWEEN_EVICTION_RUNS_MILLIS ) ) );
       }
 
       /*
@@ -224,26 +224,28 @@ public class PooledDatasourceHelper {
         props.put( "connectTimeout", "5000" );
         factory = new DriverManagerConnectionFactory( url, props );
       } else {
-        factory = new DriverManagerConnectionFactory( url, databaseConnection.getUsername(), databaseConnection.getPassword() );
+        factory =
+            new DriverManagerConnectionFactory( url, databaseConnection.getUsername(), databaseConnection
+                .getPassword() );
       }
 
       boolean defaultReadOnly =
-          attributes.containsKey( IDBDatasourceService.DEFAULT_READ_ONLY ) ? Boolean.parseBoolean( attributes
-              .get( IDBDatasourceService.TEST_WHILE_IDLE ) ) : false; // default to false
+          attributes.containsKey( IDBDatasourceService.DEFAULT_READ_ONLY ) ? Boolean.parseBoolean( attributes.get(
+              IDBDatasourceService.TEST_WHILE_IDLE ) ) : false; // default to false
 
       boolean defaultAutoCommit =
-          attributes.containsKey( IDBDatasourceService.DEFAULT_AUTO_COMMIT ) ? Boolean.parseBoolean( attributes
-              .get( IDBDatasourceService.DEFAULT_AUTO_COMMIT ) ) : true; // default to true
+          attributes.containsKey( IDBDatasourceService.DEFAULT_AUTO_COMMIT ) ? Boolean.parseBoolean( attributes.get(
+              IDBDatasourceService.DEFAULT_AUTO_COMMIT ) ) : true; // default to true
 
       KeyedObjectPoolFactory kopf = null;
 
-      if ( attributes.containsKey( IDBDatasourceService.POOL_PREPARED_STATEMENTS )
-          && true == Boolean.parseBoolean( attributes.get( IDBDatasourceService.POOL_PREPARED_STATEMENTS ) ) ) {
+      if ( attributes.containsKey( IDBDatasourceService.POOL_PREPARED_STATEMENTS ) && true == Boolean.parseBoolean(
+          attributes.get( IDBDatasourceService.POOL_PREPARED_STATEMENTS ) ) ) {
 
         int maxOpenPreparedStatements = -1; // unlimited
 
-        if ( attributes.containsKey( IDBDatasourceService.MAX_OPEN_PREPARED_STATEMENTS )
-            && NumberUtils.isNumber( attributes.get( IDBDatasourceService.MAX_OPEN_PREPARED_STATEMENTS ) ) ) {
+        if ( attributes.containsKey( IDBDatasourceService.MAX_OPEN_PREPARED_STATEMENTS ) && NumberUtils.isNumber(
+            attributes.get( IDBDatasourceService.MAX_OPEN_PREPARED_STATEMENTS ) ) ) {
 
           maxOpenPreparedStatements =
               Integer.parseInt( attributes.get( IDBDatasourceService.MAX_OPEN_PREPARED_STATEMENTS ) );
@@ -258,8 +260,7 @@ public class PooledDatasourceHelper {
        * Puts pool-specific wrappers on factory connections. For clarification: "[PoolableConnection]Factory," not
        * "Poolable[ConnectionFactory]."
        */
-      PoolableConnectionFactory pcf = new PoolableConnectionFactory(
-          factory, // ConnectionFactory
+      PoolableConnectionFactory pcf = new PoolableConnectionFactory( factory, // ConnectionFactory
           pool, // ObjectPool
           kopf, // KeyedObjectPoolFactory
           validQuery, // String (validation query)
@@ -268,8 +269,8 @@ public class PooledDatasourceHelper {
       );
 
       if ( attributes.containsKey( IDBDatasourceService.DEFAULT_TRANSACTION_ISOLATION )
-          && !IDBDatasourceService.TRANSACTION_ISOLATION_NONE_VALUE.equalsIgnoreCase( attributes
-              .get( IDBDatasourceService.DEFAULT_TRANSACTION_ISOLATION ) ) ) {
+          && !IDBDatasourceService.TRANSACTION_ISOLATION_NONE_VALUE.equalsIgnoreCase( attributes.get(
+              IDBDatasourceService.DEFAULT_TRANSACTION_ISOLATION ) ) ) {
         Isolation isolationLevel =
             Isolation.valueOf( attributes.get( IDBDatasourceService.DEFAULT_TRANSACTION_ISOLATION ) );
 
@@ -286,7 +287,8 @@ public class PooledDatasourceHelper {
        * initialize the pool to X connections
        */
       Logger.debug( PooledDatasourceHelper.class, "Pool defaults to " + maxActiveConnection + " max active/"
-          + maxIdleConnection + "max idle" + "with " + waitTime + "wait time"//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+          + maxIdleConnection + "max idle" + "with " + waitTime + "wait time"//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                                                                             // //$NON-NLS-4$ //$NON-NLS-5$
           + " idle connections." ); //$NON-NLS-1$
 
       String prePopulatePoolStr = PentahoSystem.getSystemSetting( "dbcp-defaults/pre-populate-pool", null );
@@ -295,12 +297,12 @@ public class PooledDatasourceHelper {
           pool.addObject();
         }
         if ( Logger.getLogLevel() <= ILogger.DEBUG ) {
-          Logger.debug( PooledDatasourceHelper.class,
-            "Pool has been pre-populated with " + maxIdleConnection + " connections" );
+          Logger.debug( PooledDatasourceHelper.class, "Pool has been pre-populated with " + maxIdleConnection
+              + " connections" );
         }
       }
-      Logger.debug( PooledDatasourceHelper.class, "Pool now has " + pool.getNumActive() + " active/"
-          + pool.getNumIdle() + " idle connections." ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+      Logger.debug( PooledDatasourceHelper.class, "Pool now has " + pool.getNumActive() + " active/" + pool.getNumIdle()
+          + " idle connections." ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
       /*
        * All of this is wrapped in a DataSource, which client code should already know how to handle (since it's the
        * same class of object they'd fetch via the container's JNDI tree
@@ -308,8 +310,8 @@ public class PooledDatasourceHelper {
       poolingDataSource.setPool( pool );
 
       if ( attributes.containsKey( IDBDatasourceService.ACCESS_TO_UNDERLYING_CONNECTION_ALLOWED ) ) {
-        poolingDataSource.setAccessToUnderlyingConnectionAllowed( Boolean.parseBoolean( attributes
-            .get( IDBDatasourceService.ACCESS_TO_UNDERLYING_CONNECTION_ALLOWED ) ) );
+        poolingDataSource.setAccessToUnderlyingConnectionAllowed( Boolean.parseBoolean( attributes.get(
+            IDBDatasourceService.ACCESS_TO_UNDERLYING_CONNECTION_ALLOWED ) ) );
       }
 
       // store the pool, so we can get to it later
@@ -321,19 +323,18 @@ public class PooledDatasourceHelper {
   }
 
   public static DataSource convert( IDatabaseConnection databaseConnection ) throws DBDatasourceServiceException {
-    return convert( databaseConnection,  () -> PentahoSystem.get(
-      IDatabaseDialectService.class, PentahoSessionHolder.getSession() ) );
+    return convert( databaseConnection, () -> PentahoSystem.get( IDatabaseDialectService.class, PentahoSessionHolder
+        .getSession() ) );
   }
 
   @VisibleForTesting
   static DataSource convert( IDatabaseConnection databaseConnection, Supplier<IDatabaseDialectService> dialectSupplier )
     throws DBDatasourceServiceException {
     DriverManagerDataSource basicDatasource = new DriverManagerDataSource(); // From Spring
-    IDatabaseDialect dialect = Optional.ofNullable( dialectSupplier.get() )
-      .orElseThrow( () -> new DBDatasourceServiceException(
-        Messages.getInstance().getErrorString(
-          "PooledDatasourceHelper.ERROR_0001_DATASOURCE_CANNOT_LOAD_DIALECT_SVC" )
-      ) ).getDialect( databaseConnection );
+    IDatabaseDialect dialect =
+        Optional.ofNullable( dialectSupplier.get() ).orElseThrow( () -> new DBDatasourceServiceException( Messages
+            .getInstance().getErrorString( "PooledDatasourceHelper.ERROR_0001_DATASOURCE_CANNOT_LOAD_DIALECT_SVC" ) ) )
+            .getDialect( databaseConnection );
     if ( databaseConnection.getDatabaseType() == null && dialect == null ) {
       // We do not have enough information to create a DataSource. Throwing exception
       throw new DBDatasourceServiceException( Messages.getInstance().getErrorString(
@@ -372,19 +373,19 @@ public class PooledDatasourceHelper {
   }
 
   /**
-   * For dialects which implement IDriverLocator, this method will use the provided
-   * initialize() implementation.  For all others, will initialize drivers via the call to
-   * {@link DriverManagerDataSource#setDriverClassName(String)} (which internally uses Class.forName())
+   * For dialects which implement IDriverLocator, this method will use the provided initialize() implementation. For all
+   * others, will initialize drivers via the call to {@link DriverManagerDataSource#setDriverClassName(String)} (which
+   * internally uses Class.forName())
+   * 
    * @throws DBDatasourceServiceException
    */
   private static void initDriverClass( DriverManagerDataSource driverManagerDataSource, IDatabaseDialect dialect,
-                                       String driverClassName,
-                                       String databaseConnectionName ) throws DBDatasourceServiceException {
+      String driverClassName, String databaseConnectionName ) throws DBDatasourceServiceException {
     if ( dialect instanceof IDriverLocator ) {
       if ( !( (IDriverLocator) dialect ).initialize( driverClassName ) ) {
-        throw new RuntimeException( Messages.getInstance()
-          .getErrorString( "PooledDatasourceHelper.ERROR_0009_UNABLE_TO_POOL_DATASOURCE_CANT_INITIALIZE",
-            databaseConnectionName, driverClassName ) );
+        throw new DriverNotInitializedException( Messages.getInstance().getErrorString(
+            "PooledDatasourceHelper.ERROR_0009_UNABLE_TO_POOL_DATASOURCE_CANT_INITIALIZE", databaseConnectionName,
+            driverClassName ) );
       }
       return;
     }
@@ -392,7 +393,7 @@ public class PooledDatasourceHelper {
       driverManagerDataSource.setDriverClassName( driverClassName );
     } catch ( Throwable th ) {
       throw new DBDatasourceServiceException( Messages.getInstance().getErrorString(
-        "PooledDatasourceHelper.ERROR_0002_DATASOURCE_CREATE_ERROR_NO_CLASSNAME", databaseConnectionName ), th );
+          "PooledDatasourceHelper.ERROR_0002_DATASOURCE_CREATE_ERROR_NO_CLASSNAME", databaseConnectionName ), th );
     }
   }
 
